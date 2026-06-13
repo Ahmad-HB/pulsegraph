@@ -1,5 +1,5 @@
 use chrono::{Datelike, Duration, NaiveDate};
-use owo_colors::OwoColorize;
+use crate::tui::color::{ansi_cell, ColorMode};
 use pulsegraph_core::stats::{Streaks, Totals};
 use pulsegraph_core::{Metric, Summary};
 
@@ -20,20 +20,7 @@ pub fn level(value: f64, max: f64) -> u8 {
     }
 }
 
-fn cell(lvl: u8) -> String {
-    // 5-step GitHub-style green ramp via truecolor; level 0 is a dim block.
-    let (r, g, b) = match lvl {
-        0 => (45, 51, 59),
-        1 => (14, 68, 41),
-        2 => (0, 109, 50),
-        3 => (38, 166, 65),
-        4 => (57, 211, 83),
-        _ => (45, 51, 59),
-    };
-    "  ".on_truecolor(r, g, b).to_string()
-}
-
-fn metric_label(m: Metric) -> &'static str {
+pub fn metric_label(m: Metric) -> &'static str {
     match m {
         Metric::Cost => "cost ($)",
         Metric::Billable => "billable tokens",
@@ -42,7 +29,7 @@ fn metric_label(m: Metric) -> &'static str {
     }
 }
 
-fn fmt_value(m: Metric, v: f64) -> String {
+pub fn fmt_value(m: Metric, v: f64) -> String {
     match m {
         Metric::Cost => format!("${v:.2}"),
         _ => format!("{}", v as u64),
@@ -59,6 +46,7 @@ pub fn print_heatmap(
     unreadable: u64,
 ) {
     println!("\nPulseGraph — {}\n", metric_label(metric));
+    let mode = ColorMode::detect();
 
     // Build the grid: 53 columns (weeks) x 7 rows (Mon..Sun), ending at `today`.
     let weeks = 53;
@@ -81,7 +69,7 @@ pub fn print_heatmap(
                 continue;
             }
             let v = summary.days.get(&date).map(|d| d.metric(metric)).unwrap_or(0.0);
-            line.push_str(&cell(level(v, max)));
+            line.push_str(&ansi_cell(mode, level(v, max)));
         }
         println!("{line}");
     }
