@@ -1,0 +1,16 @@
+[package]
+name = "tokenpulse-core"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+rusqlite.workspace = true
+walkdir.workspace = true
+directories.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

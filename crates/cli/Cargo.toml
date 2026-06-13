@@ -1,0 +1,13 @@
+[package]
+name = "tokenpulse-cli"
+edition.workspace = true
+version.workspace = true
+
+[[bin]]
+name = "tokenpulse"
+path = "src/main.rs"
+
+[dependencies]
+tokenpulse-core = { path = "../core" }
+clap.workspace = true
+owo-colors.workspace = true
