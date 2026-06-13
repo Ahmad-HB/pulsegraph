@@ -93,7 +93,7 @@ from the keyboard:
 | `← ↑ ↓ →` | move the day cursor (the detail panel follows) |
 | `t` | jump to today |
 | `m` | cycle metric — cost → billable → output → raw |
-| `r` | cycle range — 12 weeks → 30 days → full year |
+| `r` | cycle range — full year (default) → 12 weeks → 30 days |
 | `p` | filter by project |
 | `M` | filter by model |
 | `q` / `Esc` | quit |
@@ -119,10 +119,6 @@ Flags: `--metric <cost|billable|output|raw>`, `--project <name>`,
 Colors degrade automatically: 24-bit where the terminal supports it, xterm-256
 otherwise (so Apple Terminal renders correctly), and a glyph ramp under
 `NO_COLOR`.
-
-> **Add a screenshot:** drop a capture of the TUI at
-> `assets/screenshots/cli-tui.png` and it will appear in the
-> [Screenshots](#screenshots) section above (that path is already referenced).
 
 ## How it works
 
