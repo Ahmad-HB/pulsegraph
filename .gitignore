@@ -1,0 +1,19 @@
+# Rust / Cargo
+/target
+**/target
+Cargo.lock
+
+# Tauri
+/app/src-tauri/target
+/app/src-tauri/gen
+
+# Node / frontend
+node_modules
+dist
+.vite
+
+# Brainstorm scratch (visual companion)
+.superpowers/
+
+# OS
+.DS_Store
