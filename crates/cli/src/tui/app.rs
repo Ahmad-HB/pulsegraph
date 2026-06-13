@@ -96,7 +96,9 @@ impl App {
             pricing,
             metric,
             filter,
-            range: Range::TwelveWeeks,
+            // Default to the widest window so the heatmap fills the terminal;
+            // `r` zooms in to 12 weeks / 30 days.
+            range: Range::Year,
             cursor: today,
             today,
             view,
@@ -302,13 +304,13 @@ mod tests {
     #[test]
     fn range_cycles_and_wraps() {
         let mut a = app_with(NaiveDate::from_ymd_opt(2026, 6, 14).unwrap(), vec![]);
+        assert_eq!(a.range, Range::Year); // widest by default
+        a.cycle_range();
         assert_eq!(a.range, Range::TwelveWeeks);
         a.cycle_range();
         assert_eq!(a.range, Range::ThirtyDays);
         a.cycle_range();
         assert_eq!(a.range, Range::Year);
-        a.cycle_range();
-        assert_eq!(a.range, Range::TwelveWeeks);
     }
 
     #[test]
@@ -376,6 +378,7 @@ mod tests {
     fn cycle_range_clamps_a_cursor_that_falls_outside_the_new_window() {
         let today = NaiveDate::from_ymd_opt(2026, 6, 14).unwrap();
         let mut a = app_with(today, vec![]);
+        a.range = Range::TwelveWeeks; // start in the 12-week window
         // Move the cursor far back while in the 12-week window.
         a.move_cursor(-8, 0); // 8 weeks back, still inside 12 weeks
         let far_back = a.cursor;

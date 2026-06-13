@@ -19,15 +19,16 @@ pub fn draw(f: &mut Frame, app: &App, mode: ColorMode) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Min(9),    // heatmap
-            Constraint::Length(8), // day detail
-            Constraint::Length(3), // stats footer
+            Constraint::Length(11), // heatmap (2 borders + 9 content rows)
+            Constraint::Length(8),  // day detail
+            Constraint::Min(0),     // spacer pushes the footer to the bottom
+            Constraint::Length(3),  // stats footer
         ])
         .split(f.area());
 
     draw_heatmap(f, app, mode, chunks[0]);
     draw_detail(f, app, chunks[1]);
-    draw_footer(f, app, chunks[2]);
+    draw_footer(f, app, chunks[3]);
 
     if let Some(p) = &app.picker {
         draw_picker(f, p, f.area());
@@ -83,7 +84,8 @@ fn cell_span(mode: ColorMode, lvl: u8, cursor: bool) -> Span<'static> {
 
 /// Month labels aligned to the cell grid (writes 3-letter names into a char buffer).
 fn month_header(start: NaiveDate, weeks: i64) -> Line<'static> {
-    let width = GUTTER + (weeks as usize) * 2;
+    // Each week column is 3 cells wide: a 2-char block plus a 1-char gap.
+    let width = GUTTER + (weeks as usize) * 3;
     let mut buf = vec![b' '; width];
     let mut last = 0u32;
     for w in 0..weeks {
@@ -91,7 +93,7 @@ fn month_header(start: NaiveDate, weeks: i64) -> Line<'static> {
         if d.month() != last {
             last = d.month();
             let name = month_abbr(d.month());
-            let col = GUTTER + (w as usize) * 2;
+            let col = GUTTER + (w as usize) * 3;
             for (i, ch) in name.bytes().enumerate() {
                 if col + i < width {
                     buf[col + i] = ch;
@@ -106,8 +108,9 @@ fn legend_line(mode: ColorMode) -> Line<'static> {
     let mut spans = vec![Span::raw(" ".repeat(GUTTER)), Span::raw("Less ")];
     for lvl in 0..=4u8 {
         spans.push(cell_span(mode, lvl, false));
+        spans.push(Span::raw(" "));
     }
-    spans.push(Span::raw(" More"));
+    spans.push(Span::raw("More"));
     Line::from(spans)
 }
 
@@ -121,8 +124,9 @@ fn draw_heatmap(f: &mut Frame, app: &App, mode: ColorMode, area: Rect) {
     let total_weeks = (today - full_start).num_days() / 7 + 1;
 
     // Clamp the number of week-columns to what fits the inner width.
+    // Each column is 3 cells wide (2-char block + 1-char gap).
     let avail = inner.width as i64 - GUTTER as i64;
-    let max_weeks = (avail / 2).max(1);
+    let max_weeks = (avail / 3).max(1);
     let weeks = total_weeks.min(max_weeks).max(1);
 
     // Anchor the grid to the Monday of today's week so today is always in the last
@@ -140,10 +144,11 @@ fn draw_heatmap(f: &mut Frame, app: &App, mode: ColorMode, area: Rect) {
             let date = start + Duration::days(w * 7 + row as i64);
             if date > today {
                 spans.push(Span::raw("  "));
-                continue;
+            } else {
+                let lvl = level(app.day_value(date), max);
+                spans.push(cell_span(mode, lvl, date == app.cursor));
             }
-            let lvl = level(app.day_value(date), max);
-            spans.push(cell_span(mode, lvl, date == app.cursor));
+            spans.push(Span::raw(" ")); // gap between week columns
         }
         lines.push(Line::from(spans));
     }
