@@ -1,80 +1,67 @@
-import { useEffect, useState, useCallback, useRef } from "react";
-import { getSnapshot, refresh } from "./api";
-import type { Snapshot, Metric } from "./types";
+import { useEffect, useMemo, useState } from "react";
+import { useSnapshot } from "./hooks/useSnapshot";
+import { useSettings } from "./hooks/useSettings";
+import { themeToVars } from "./lib/theme";
+import type { Metric } from "./types";
+import { Header } from "./components/Header";
+import { Filters } from "./components/Filters";
 import { Heatmap } from "./components/Heatmap";
+import { UsageCard } from "./components/UsageCard";
+import { StreaksCard } from "./components/StreaksCard";
+import { ProjectBars } from "./components/ProjectBars";
+import { Footer } from "./components/Footer";
+import { Preferences } from "./components/Preferences";
 import "./App.css";
 
-const METRICS: Metric[] = ["cost", "billable", "output", "raw"];
-
-function fmt(metric: Metric, v: number): string {
-  return metric === "cost" ? `$${v.toFixed(2)}` : Math.round(v).toLocaleString();
+function todayKey(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 export default function App() {
-  const [metric, setMetric] = useState<Metric>("cost");
-  const [snap, setSnap] = useState<Snapshot | null>(null);
+  const { settings, update } = useSettings();
+  const [project, setProject] = useState<string | null>(null);
+  const [model, setModel] = useState<string | null>(null);
+  const [view, setView] = useState<"popover" | "prefs">("popover");
+  const metric = settings.metric;
+  const setMetric = (m: Metric) => update({ metric: m });
 
-  const metricRef = useRef<Metric>(metric);
-  metricRef.current = metric;
+  const snap = useSnapshot(metric, project, model);
 
-  const load = useCallback(async (m: Metric) => {
-    setSnap(await getSnapshot(m, null, null));
-  }, []);
-
-  // Mount-only: prime + refresh-from-disk every 60s, reload the current metric.
+  // Apply theme as CSS variables on the root.
   useEffect(() => {
-    let alive = true;
-    const tick = async () => {
-      await refresh();
-      if (alive) await load(metricRef.current);
-    };
-    tick();
-    const id = setInterval(tick, 60_000);
-    return () => { alive = false; clearInterval(id); };
-  }, [load]);
+    const vars = themeToVars(settings.theme);
+    for (const [k, v] of Object.entries(vars)) document.documentElement.style.setProperty(k, v);
+  }, [settings.theme]);
 
-  // Metric toggle: re-aggregate in memory only (no disk, no timer churn).
-  useEffect(() => { load(metric); }, [metric, load]);
+  const fmt = useMemo(() => (v: number) =>
+    metric === "cost" ? `$${v.toFixed(2)}` : Math.round(v).toLocaleString(), [metric]);
+
+  if (view === "prefs") {
+    return <Preferences theme={settings.theme} setTheme={(t) => update({ theme: t })} onBack={() => setView("popover")} unreadable={snap?.unreadable_lines ?? 0} />;
+  }
 
   const today = snap?.days.find((d) => d.date === todayKey())?.value ?? 0;
 
   return (
     <div className="pop">
-      <div className="ph">
-        <div className="t">PulseGraph</div>
-        <div className="big">{snap ? fmt(metric, today) : "…"}</div>
-      </div>
-      <div className="toggles">
-        {METRICS.map((m) => (
-          <button
-            key={m}
-            className={`chip ${m === metric ? "on" : ""}`}
-            onClick={() => setMetric(m)}
-          >
-            {m}
-          </button>
-        ))}
-      </div>
+      <Header today={snap ? fmt(today) : "…"} metric={metric} setMetric={setMetric} />
+      {snap && <Filters projects={snap.projects} models={snap.models} project={project} model={model} setProject={setProject} setModel={setModel} />}
       <div className="pbody">
         {snap && snap.days.length > 0 ? (
-          <Heatmap days={snap.days} />
+          <>
+            <Heatmap days={snap.days} />
+            <div className="cards">
+              <UsageCard snap={snap} fmt={fmt} />
+              <StreaksCard snap={snap} />
+            </div>
+            <ProjectBars items={snap.projects_today} fmt={fmt} />
+          </>
         ) : (
           <p className="empty">No Claude Code usage found yet.</p>
         )}
-        {snap && (
-          <div className="stats">
-            Total {fmt(metric, snap.total)} · streak {snap.current_streak}d ·
-            active {snap.active_days}d
-          </div>
-        )}
       </div>
+      <Footer generatedAt={snap?.generated_at ?? 0} onSettings={() => setView("prefs")} />
     </div>
   );
-}
-
-function todayKey(): string {
-  const d = new Date();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${d.getFullYear()}-${m}-${day}`;
 }

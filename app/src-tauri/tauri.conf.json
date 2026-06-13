@@ -14,7 +14,7 @@
       {
         "label": "popover",
         "width": 480,
-        "height": 560,
+        "height": 620,
         "decorations": false,
         "transparent": false,
         "alwaysOnTop": true,
