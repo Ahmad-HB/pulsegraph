@@ -17,13 +17,9 @@ pub fn run() {
             #[cfg(target_os = "macos")]
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
-            // Prime data once at startup (ignore errors; UI shows empty/stale).
-            let handle = app.handle().clone();
-            let state: tauri::State<AppState> = handle.state();
-            let _ = commands::refresh(state);
+            // Build the tray first, then prime data — refresh() also sets the tray title.
             tray::setup_tray(app.handle())?;
-            // Show today's total on the tray label.
-            tray::update_tray_title(app.handle());
+            let _ = commands::refresh(app.handle().clone(), app.state());
 
             // Frosted-glass vibrancy + rounded corners on the popover (macOS).
             #[cfg(target_os = "macos")]

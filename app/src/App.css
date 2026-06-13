@@ -61,7 +61,7 @@ body { margin: 0; background: transparent; }
 .pb { display:flex; align-items:center; gap:8px; margin:5px 0; font-size:11px; }
 .pb .nm { width:110px; color:var(--fg); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .pb .track { flex:1; height:6px; background:var(--panel); border-radius:4px; overflow:hidden; }
-.pb .fill { height:100%; background:linear-gradient(90deg,var(--hm-2),var(--hm-4)); }
+.pb .fill { display:block; height:100%; background:linear-gradient(90deg,var(--hm-2),var(--hm-4)); }
 .pb .v { width:54px; text-align:right; color:var(--muted); }
 .footer { display:flex; justify-content:space-between; align-items:center; padding:8px 14px;
   border-top:1px solid var(--border); font-size:11px; color:var(--muted); }

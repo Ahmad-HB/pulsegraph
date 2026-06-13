@@ -3,9 +3,10 @@ use pulsegraph_core::{scan, cache::Cache};
 use crate::state::AppState;
 use crate::snapshot::{build_snapshot, Snapshot};
 
-/// Re-scan transcripts (incremental, cache-backed) into in-memory events.
+/// Re-scan transcripts (incremental, cache-backed) into in-memory events,
+/// then refresh the menu-bar title so it stays in sync with the popover.
 #[tauri::command]
-pub fn refresh(state: State<AppState>) -> Result<(), String> {
+pub fn refresh(app: tauri::AppHandle, state: State<AppState>) -> Result<(), String> {
     let Some(dir) = state.projects_dir.clone() else {
         return Err("Could not locate ~/.claude/projects".into());
     };
@@ -14,6 +15,7 @@ pub fn refresh(state: State<AppState>) -> Result<(), String> {
     *state.events.lock().unwrap() = result.events;
     *state.unreadable_lines.lock().unwrap() = result.unreadable_lines;
     *state.generated_at.lock().unwrap() = now_secs();
+    crate::tray::update_tray_title(&app);
     Ok(())
 }
 
