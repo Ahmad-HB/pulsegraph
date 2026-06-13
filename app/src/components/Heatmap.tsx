@@ -3,7 +3,7 @@ import type { DayValue } from "../types";
 
 // Recent window — the full year overflows a menu-bar popover, and a ~8-month
 // window comfortably covers actual usage while fitting the width.
-const WEEKS = 34;
+const WEEKS = 48;
 
 export function Heatmap({ days }: { days: DayValue[] }) {
   const today = new Date();

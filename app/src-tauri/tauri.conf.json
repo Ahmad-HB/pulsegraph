@@ -14,8 +14,8 @@
     "windows": [
       {
         "label": "popover",
-        "width": 560,
-        "height": 600,
+        "width": 720,
+        "height": 500,
         "decorations": false,
         "transparent": true,
         "alwaysOnTop": true,

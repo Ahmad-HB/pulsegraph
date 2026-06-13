@@ -77,7 +77,7 @@ pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
                         // This same click already blurred+hid the popover — toggle-off; do nothing.
                     } else {
                         // Anchor the popover just under the menu-bar icon.
-                        let x = (position.x as i32 - 460).max(8);
+                        let x = (position.x as i32 - 700).max(8);
                         let y = (position.y as i32 + 8).max(8);
                         let _ = win.set_position(Position::Physical(PhysicalPosition { x, y }));
                         LAST_SHOW_MS.store(now_ms(), Ordering::Relaxed);
