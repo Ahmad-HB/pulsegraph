@@ -1,4 +1,5 @@
 export type DayValue = { date: string; value: number };
+export type ProjectValue = { name: string; value: number };
 
 export type Snapshot = {
   days: DayValue[];
@@ -7,8 +8,11 @@ export type Snapshot = {
   avg_per_active_day: number;
   active_days: number;
   current_streak: number;
+  current_range: [string, string] | null;
   longest_streak: number;
+  longest_range: [string, string] | null;
   projects: string[];
+  projects_today: ProjectValue[];
   models: string[];
   generated_at: number;
   unreadable_lines: number;

@@ -12,3 +12,7 @@ export async function getSnapshot(
 ): Promise<Snapshot> {
   return invoke<Snapshot>("get_snapshot", { metric, project, model });
 }
+
+export async function quit(): Promise<void> {
+  await invoke("quit");
+}
