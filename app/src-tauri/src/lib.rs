@@ -24,6 +24,21 @@ pub fn run() {
             tray::setup_tray(app.handle())?;
             // Show today's total on the tray label.
             tray::update_tray_title(app.handle());
+
+            // Frosted-glass vibrancy + rounded corners on the popover (macOS).
+            #[cfg(target_os = "macos")]
+            {
+                use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial, NSVisualEffectState};
+                if let Some(win) = app.get_webview_window("popover") {
+                    let _ = apply_vibrancy(
+                        &win,
+                        NSVisualEffectMaterial::HudWindow,
+                        Some(NSVisualEffectState::Active),
+                        Some(16.0),
+                    );
+                }
+            }
+
             Ok(())
         })
         .on_window_event(|window, event| {
