@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct TokenCounts {
     pub input: u64,
     pub output: u64,
@@ -41,7 +42,7 @@ impl std::ops::AddAssign for TokenCounts {
 }
 
 /// A single usage record, source-agnostic so non-Claude-Code parsers can emit it later.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UsageEvent {
     pub source: String,
     pub timestamp: DateTime<Utc>,

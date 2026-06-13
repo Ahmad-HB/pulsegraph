@@ -4,6 +4,7 @@ pub mod parse;
 pub mod discovery;
 pub mod aggregate;
 pub mod stats;
+pub mod cache;
 
 #[cfg(test)]
 mod smoke {
