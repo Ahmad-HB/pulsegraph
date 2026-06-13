@@ -3,6 +3,7 @@ pub mod pricing;
 pub mod parse;
 pub mod discovery;
 pub mod aggregate;
+pub mod stats;
 
 #[cfg(test)]
 mod smoke {
