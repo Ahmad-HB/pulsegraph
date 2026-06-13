@@ -2,10 +2,12 @@ mod cache_path;
 mod render;
 mod tui;
 
+use std::io::IsTerminal;
 use clap::{Parser, ValueEnum};
 use pulsegraph_core::{
     default_projects_dir, scan, streaks, summarize, totals, Filter, Metric, Pricing,
 };
+use tui::app::App;
 
 #[derive(Parser, Debug)]
 #[command(name = "pulsegraph", about = "Claude Code token-usage heatmap")]
@@ -74,15 +76,28 @@ fn main() {
 
     let pricing = Pricing::bundled();
     let filter = Filter { project: args.project.clone(), model: args.model.clone() };
-    let summary = summarize(scan_result.events.iter(), &pricing, &filter);
-
     let today = chrono::Local::now().date_naive();
-    let st = streaks(&summary, today);
-    let tot = totals(&summary, metric);
 
     if args.json {
+        let summary = summarize(scan_result.events.iter(), &pricing, &filter);
+        let st = streaks(&summary, today);
+        let tot = totals(&summary, metric);
         render::print_json(&summary, &st, &tot, metric);
-    } else {
+        return;
+    }
+
+    // Non-interactive (piped/redirected) output keeps the static heatmap.
+    if !std::io::stdout().is_terminal() {
+        let summary = summarize(scan_result.events.iter(), &pricing, &filter);
+        let st = streaks(&summary, today);
+        let tot = totals(&summary, metric);
         render::print_heatmap(&summary, &st, &tot, metric, today, scan_result.unreadable_lines);
+        return;
+    }
+
+    let app = App::new(scan_result.events, pricing, metric, filter, today);
+    if let Err(e) = tui::run(app) {
+        eprintln!("tui error: {e}");
+        std::process::exit(1);
     }
 }
