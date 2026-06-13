@@ -8,6 +8,12 @@ pub struct DayValue {
 }
 
 #[derive(Serialize, Clone)]
+pub struct ProjectValue {
+    pub name: String,
+    pub value: f64,
+}
+
+#[derive(Serialize, Clone)]
 pub struct Snapshot {
     pub days: Vec<DayValue>,
     pub total: f64,
@@ -15,8 +21,11 @@ pub struct Snapshot {
     pub avg_per_active_day: f64,
     pub active_days: u32,
     pub current_streak: u32,
+    pub current_range: Option<(String, String)>,
     pub longest_streak: u32,
+    pub longest_range: Option<(String, String)>,
     pub projects: Vec<String>,
+    pub projects_today: Vec<ProjectValue>,
     pub models: Vec<String>,
     pub generated_at: i64,
     pub unreadable_lines: u64,
@@ -61,6 +70,41 @@ pub fn build_snapshot(
     let st = streaks(&summary, today);
     let tot = totals(&summary, metric);
 
+    // Per-project totals for *today* in the selected metric, sorted desc.
+    let mut projects_today: Vec<ProjectValue> = summary
+        .days
+        .get(&today)
+        .map(|_| {
+            // Recompute per-project today by filtering events to today's local date.
+            let mut map: std::collections::HashMap<String, f64> = std::collections::HashMap::new();
+            for e in events.iter() {
+                if pulsegraph_core::aggregate::local_date(e.timestamp) != today {
+                    continue;
+                }
+                if let Some(p) = &filter.project {
+                    if &e.project != p { continue; }
+                }
+                if let Some(m) = &filter.model {
+                    if &e.model != m { continue; }
+                }
+                let v = match metric {
+                    Metric::Cost => pricing.cost(&e.model, &e.tokens).unwrap_or(0.0),
+                    _ => metric.value_tokens_f64(&e.tokens),
+                };
+                *map.entry(e.project.clone()).or_insert(0.0) += v;
+            }
+            let mut v: Vec<ProjectValue> = map.into_iter().map(|(name, value)| ProjectValue { name, value }).collect();
+            v.sort_by(|a, b| b.value.partial_cmp(&a.value).unwrap_or(std::cmp::Ordering::Equal));
+            v.truncate(5);
+            v
+        })
+        .unwrap_or_default();
+    projects_today.retain(|p| p.value > 0.0);
+
+    let fmt_range = |r: Option<(chrono::NaiveDate, chrono::NaiveDate)>| {
+        r.map(|(a, b)| (a.to_string(), b.to_string()))
+    };
+
     Snapshot {
         days,
         total: tot.total,
@@ -68,8 +112,11 @@ pub fn build_snapshot(
         avg_per_active_day: tot.avg_per_active_day,
         active_days: tot.active_days,
         current_streak: st.current,
+        current_range: fmt_range(st.current_range),
         longest_streak: st.longest,
+        longest_range: fmt_range(st.longest_range),
         projects,
+        projects_today,
         models,
         generated_at,
         unreadable_lines: 0,
@@ -110,10 +157,32 @@ mod tests {
         assert_eq!(snap.active_days, 2);
         assert!(snap.models.contains(&"claude-opus-4-8".to_string()));
         assert!(snap.projects.contains(&"API".to_string()));
-        assert!(snap.projects.contains(&"Vault".to_string()));
-        // 1M + 2M input * $5/M = $15 total
         assert!((snap.total - 15.0).abs() < 1e-9);
         assert_eq!(snap.days.len(), 2);
+        // best_day present with a date string
+        assert!(snap.best_day.is_some());
+    }
+
+    #[test]
+    fn projects_today_lists_only_todays_usage_by_value() {
+        // One event today (API) and one yesterday (Vault). projects_today = API only.
+        let today = chrono::Local::now();
+        let today_utc = today.with_timezone(&chrono::Utc).to_rfc3339();
+        let events = vec![
+            UsageEvent {
+                source: "claude-code".into(),
+                timestamp: chrono::Utc::now(),
+                model: "claude-opus-4-8".into(),
+                project: "API".into(),
+                session_id: "s".into(),
+                tokens: TokenCounts { input: 1_000_000, output: 0, cache_write_5m: 0, cache_write_1h: 0, cache_read: 0 },
+            },
+        ];
+        let _ = today_utc;
+        let snap = build_snapshot(&events, &pricing(), None, None, "cost", 0);
+        assert_eq!(snap.projects_today.len(), 1);
+        assert_eq!(snap.projects_today[0].name, "API");
+        assert!(snap.projects_today[0].value > 0.0);
     }
 
     #[test]

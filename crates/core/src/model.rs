@@ -71,6 +71,11 @@ impl Metric {
             Metric::Cost => 0, // Cost is not a token count; see aggregate::DayStats::metric
         }
     }
+
+    /// Same as value_tokens but as f64 (for cost-mixed aggregation paths).
+    pub fn value_tokens_f64(&self, t: &TokenCounts) -> f64 {
+        self.value_tokens(t) as f64
+    }
 }
 
 #[cfg(test)]
