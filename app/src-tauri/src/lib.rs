@@ -11,6 +11,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init()) // keep whatever plugins the scaffold added
         .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(tauri_plugin_dialog::init())
         .manage(AppState::new())
         .setup(|app| {
             // Menu-bar app: no dock icon, stays resident as a tray-only accessory.
@@ -41,6 +42,10 @@ pub fn run() {
             use std::sync::atomic::Ordering;
             if let tauri::WindowEvent::Focused(false) = event {
                 if window.label() == "popover" {
+                    // A native modal (image picker) is up — keep the popover put.
+                    if tray::SUPPRESS_HIDE.load(Ordering::Relaxed) {
+                        return;
+                    }
                     let since_show =
                         tray::now_ms().saturating_sub(tray::LAST_SHOW_MS.load(Ordering::Relaxed));
                     if since_show > 300 {
@@ -50,7 +55,7 @@ pub fn run() {
                 }
             }
         })
-        .invoke_handler(tauri::generate_handler![commands::refresh, commands::get_snapshot, commands::quit])
+        .invoke_handler(tauri::generate_handler![commands::refresh, commands::get_snapshot, commands::quit, commands::pick_avatar, commands::get_avatar, commands::clear_avatar])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

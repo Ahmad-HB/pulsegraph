@@ -27,4 +27,6 @@ pulsegraph-core = { path = "../../crates/core" }
 chrono = { version = "0.4", default-features = false, features = ["std", "clock"] }
 directories = "5"
 window-vibrancy = "0.5"
+tauri-plugin-dialog = "2.7.1"
+base64 = "0.22.1"
 

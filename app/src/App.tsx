@@ -11,6 +11,7 @@ import { StreaksCard } from "./components/StreaksCard";
 import { ProjectBars } from "./components/ProjectBars";
 import { Footer } from "./components/Footer";
 import { Preferences } from "./components/Preferences";
+import { getAvatar, pickAvatar } from "./api";
 import "./App.css";
 
 function todayKey(): string {
@@ -25,6 +26,17 @@ export default function App() {
   const [view, setView] = useState<"popover" | "prefs">("popover");
   const metric = settings.metric;
   const setMetric = (m: Metric) => update({ metric: m });
+
+  const [avatar, setAvatarState] = useState<string | null>(null);
+  useEffect(() => { getAvatar().then(setAvatarState).catch(() => {}); }, []);
+  const chooseAvatar = async () => {
+    try {
+      const url = await pickAvatar();
+      if (url) setAvatarState(url);
+    } catch (e) {
+      console.error("avatar pick failed", e);
+    }
+  };
 
   const snap = useSnapshot(metric, project, model);
 
@@ -51,8 +63,8 @@ export default function App() {
 
   return (
     <div className="pop">
-      <Header today={snap ? fmt(today) : "…"} metric={metric} setMetric={setMetric} />
-      {snap && <Filters projects={snap.projects} models={snap.models} project={project} model={model} setProject={setProject} setModel={setModel} />}
+      <Header today={snap ? fmt(today) : "…"} avatar={avatar} onAvatarClick={chooseAvatar} />
+      <Filters metric={metric} setMetric={setMetric} projects={snap?.projects ?? []} models={snap?.models ?? []} project={project} model={model} setProject={setProject} setModel={setModel} />
       <div className="pbody">
         {snap && snap.days.length > 0 ? (
           <>

@@ -4,7 +4,7 @@ use tauri::{
     AppHandle, Manager, PhysicalPosition, Position, Runtime,
 };
 
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 
 use crate::state::AppState;
 use crate::snapshot::build_snapshot;
@@ -30,6 +30,10 @@ pub fn update_tray_title<R: Runtime>(app: &AppHandle<R>) {
 /// macOS menu-bar focus flapping.
 pub static LAST_SHOW_MS: AtomicU64 = AtomicU64::new(0);
 pub static LAST_BLUR_HIDE_MS: AtomicU64 = AtomicU64::new(0);
+
+/// When true, the popover's blur-hide is suppressed — set while a native modal
+/// (e.g. the image picker) holds focus, so the popover doesn't vanish under it.
+pub static SUPPRESS_HIDE: AtomicBool = AtomicBool::new(false);
 
 /// Blur events within this window of a show() are the transient focus-flap and
 /// are ignored; a tray click within this window of a blur-hide is the close half
