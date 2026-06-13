@@ -66,7 +66,7 @@ pub fn totals(summary: &Summary, metric: Metric) -> Totals {
     for (date, day) in &summary.days {
         let v = day.metric(metric);
         total += v;
-        if best_day.map_or(true, |(_, bv)| v > bv) {
+        if best_day.is_none_or(|(_, bv)| v > bv) {
             best_day = Some((*date, v));
         }
     }
@@ -85,8 +85,7 @@ mod tests {
         let mut days: BTreeMap<NaiveDate, DayStats> = BTreeMap::new();
         for (d, cost) in dates {
             let date = NaiveDate::parse_from_str(d, "%Y-%m-%d").unwrap();
-            let mut ds = DayStats::default();
-            ds.cost = *cost;
+            let ds = DayStats { cost: *cost, ..Default::default() };
             days.insert(date, ds);
         }
         Summary { days, ..Default::default() }

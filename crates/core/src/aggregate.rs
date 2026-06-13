@@ -90,7 +90,6 @@ pub fn summarize<'a>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::TimeZone;
 
     fn ev(day_utc: &str, project: &str, model: &str, session: &str, input: u64) -> UsageEvent {
         UsageEvent {
@@ -128,7 +127,7 @@ mod tests {
 
     #[test]
     fn unknown_model_counts_as_unpriced() {
-        let evs = vec![ev("2026-06-13T10:00:00Z", "API", "mystery", "s1", 1_000_000)];
+        let evs = [ev("2026-06-13T10:00:00Z", "API", "mystery", "s1", 1_000_000)];
         let s = summarize(evs.iter(), &pricing(), &Filter::default());
         let day = local_date(evs[0].timestamp);
         assert_eq!(s.days[&day].unpriced_events, 1);
