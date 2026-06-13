@@ -20,3 +20,6 @@ dist
 
 # IDE
 .vscode/
+
+# Internal design docs (kept local, not published)
+docs/
