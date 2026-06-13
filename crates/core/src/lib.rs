@@ -1,4 +1,5 @@
 pub mod model;
+pub mod pricing;
 
 #[cfg(test)]
 mod smoke {
