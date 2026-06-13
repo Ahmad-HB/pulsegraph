@@ -12,6 +12,10 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init()) // keep whatever plugins the scaffold added
         .manage(AppState::new())
         .setup(|app| {
+            // Menu-bar app: no dock icon, stays resident as a tray-only accessory.
+            #[cfg(target_os = "macos")]
+            app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+
             // Prime data once at startup (ignore errors; UI shows empty/stale).
             let handle = app.handle().clone();
             let state: tauri::State<AppState> = handle.state();
