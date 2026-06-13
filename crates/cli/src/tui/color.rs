@@ -88,3 +88,41 @@ pub fn ansi_cell(mode: ColorMode, lvl: u8) -> String {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn no_color_forces_mono_even_with_truecolor() {
+        assert_eq!(ColorMode::from_env(true, Some("truecolor")), ColorMode::Mono);
+    }
+
+    #[test]
+    fn truecolor_detected_from_colorterm() {
+        assert_eq!(ColorMode::from_env(false, Some("truecolor")), ColorMode::Truecolor);
+        assert_eq!(ColorMode::from_env(false, Some("24bit")), ColorMode::Truecolor);
+    }
+
+    #[test]
+    fn defaults_to_indexed_when_no_colorterm() {
+        assert_eq!(ColorMode::from_env(false, None), ColorMode::Indexed256);
+        assert_eq!(ColorMode::from_env(false, Some("")), ColorMode::Indexed256);
+    }
+
+    #[test]
+    fn indexed_ramp_endpoints() {
+        assert_eq!(idx_ramp(0), 235);
+        assert_eq!(idx_ramp(4), 40);
+    }
+
+    #[test]
+    fn ansi_cell_indexed_emits_256color_sequence() {
+        assert_eq!(ansi_cell(ColorMode::Indexed256, 0), "\x1b[48;5;235m  \x1b[0m");
+    }
+
+    #[test]
+    fn ansi_cell_mono_uses_glyphs_not_escapes() {
+        assert_eq!(ansi_cell(ColorMode::Mono, 4), "██");
+    }
+}
