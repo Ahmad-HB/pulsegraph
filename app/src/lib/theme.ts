@@ -16,8 +16,12 @@ export const defaultTheme: Theme = {
 };
 
 const SURFACE = {
-  dark:  { bg: "#0d1117", panel: "#161b22", border: "#21262d", fg: "#e6edf3", muted: "#7d8590", chip: "#161b22", chipBorder: "#30363d" },
-  light: { bg: "#ffffff", panel: "#f6f8fa", border: "#d0d7de", fg: "#1f2328", muted: "#656d76", chip: "#f6f8fa", chipBorder: "#d0d7de" },
+  dark:  { bg:"rgba(22,27,34,0.92)", panel:"rgba(255,255,255,0.05)", border:"rgba(255,255,255,0.09)",
+           fg:"#e6edf3", muted:"#9aa4af", chip:"rgba(255,255,255,0.06)", chipBorder:"rgba(255,255,255,0.16)",
+           empty:"#2d333b" },
+  light: { bg:"rgba(248,250,252,0.94)", panel:"rgba(0,0,0,0.04)", border:"rgba(0,0,0,0.10)",
+           fg:"#1f2328", muted:"#57606a", chip:"rgba(0,0,0,0.05)", chipBorder:"rgba(0,0,0,0.14)",
+           empty:"#ebedf0" },
 };
 
 export function rampFor(theme: Theme): string[] {
@@ -28,7 +32,7 @@ export function themeToVars(theme: Theme): Record<string, string> {
   const ramp = rampFor(theme);
   const s = SURFACE[theme.mode];
   return {
-    "--hm-0": ramp[0], "--hm-1": ramp[1], "--hm-2": ramp[2], "--hm-3": ramp[3], "--hm-4": ramp[4],
+    "--hm-0": s.empty, "--hm-1": ramp[1], "--hm-2": ramp[2], "--hm-3": ramp[3], "--hm-4": ramp[4],
     "--bg": s.bg, "--panel": s.panel, "--border": s.border, "--fg": s.fg, "--muted": s.muted,
     "--chip": s.chip, "--chip-border": s.chipBorder,
   };
