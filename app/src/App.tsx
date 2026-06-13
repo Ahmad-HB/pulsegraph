@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { getSnapshot, refresh } from "./api";
 import type { Snapshot, Metric } from "./types";
 import { Heatmap } from "./components/Heatmap";
@@ -14,23 +14,26 @@ export default function App() {
   const [metric, setMetric] = useState<Metric>("cost");
   const [snap, setSnap] = useState<Snapshot | null>(null);
 
+  const metricRef = useRef<Metric>(metric);
+  metricRef.current = metric;
+
   const load = useCallback(async (m: Metric) => {
     setSnap(await getSnapshot(m, null, null));
   }, []);
 
-  // Initial + 60s refresh-from-disk, then reload snapshot.
+  // Mount-only: prime + refresh-from-disk every 60s, reload the current metric.
   useEffect(() => {
     let alive = true;
     const tick = async () => {
       await refresh();
-      if (alive) await load(metric);
+      if (alive) await load(metricRef.current);
     };
     tick();
     const id = setInterval(tick, 60_000);
     return () => { alive = false; clearInterval(id); };
-  }, [load, metric]);
+  }, [load]);
 
-  // Metric toggle: re-aggregate in memory (no disk).
+  // Metric toggle: re-aggregate in memory only (no disk, no timer churn).
   useEffect(() => { load(metric); }, [metric, load]);
 
   const today = snap?.days.find((d) => d.date === todayKey())?.value ?? 0;
