@@ -8,9 +8,9 @@ export function level(value: number, max: number): number {
   return 1;
 }
 
-/** 53-week x 7-day grid (rows = Mon..Sun), Monday-aligned, ending in the week of `today`. */
-export function buildYearGrid(today: Date): Date[][] {
-  const WEEKS = 53;
+/** `weeks`-wide x 7-day grid (rows = Mon..Sun), Monday-aligned, ending in the week of `today`. */
+export function buildYearGrid(today: Date, weeksCount = 53): Date[][] {
+  const WEEKS = weeksCount;
   const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   // Anchor the LAST column on the Monday of today's week, then back up
   // (WEEKS-1) weeks so today falls inside the final column.

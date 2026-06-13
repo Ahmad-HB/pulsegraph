@@ -34,8 +34,14 @@ export default function App() {
     for (const [k, v] of Object.entries(vars)) document.documentElement.style.setProperty(k, v);
   }, [settings.theme]);
 
-  const fmt = useMemo(() => (v: number) =>
-    metric === "cost" ? `$${v.toFixed(2)}` : Math.round(v).toLocaleString(), [metric]);
+  const fmt = useMemo(() => {
+    const compact = (n: number) =>
+      n >= 1e9 ? (n / 1e9).toFixed(2) + "B"
+      : n >= 1e6 ? (n / 1e6).toFixed(2) + "M"
+      : n >= 1e3 ? (n / 1e3).toFixed(1) + "k"
+      : String(Math.round(n));
+    return (v: number) => (metric === "cost" ? `$${v.toFixed(2)}` : compact(v));
+  }, [metric]);
 
   if (view === "prefs") {
     return <Preferences theme={settings.theme} setTheme={(t) => update({ theme: t })} onBack={() => setView("popover")} unreadable={snap?.unreadable_lines ?? 0} />;

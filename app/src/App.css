@@ -31,7 +31,7 @@ body { margin: 0; background: transparent; }
   overflow:hidden; text-overflow:ellipsis; }
 .dd-item:hover { background:var(--panel); }
 .dd-item.on { color:#cae3ff; background:rgba(31,111,235,0.18); }
-.pbody { padding: 10px 14px 12px; }
+.pbody { padding: 10px 14px 12px; overflow-x: hidden; }
 .hm-wrap { font-size:9px; color:var(--muted); }
 .hm-months { display:flex; margin-left:28px; }
 .hm-month { width:calc((9px + 3px) * 4.345); white-space:nowrap; overflow:hidden; }

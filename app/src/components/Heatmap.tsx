@@ -3,9 +3,13 @@ import type { DayValue } from "../types";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
+// Recent window — the full year overflows a menu-bar popover, and a ~8-month
+// window comfortably covers actual usage while fitting the width.
+const WEEKS = 34;
+
 export function Heatmap({ days }: { days: DayValue[] }) {
   const today = new Date();
-  const grid = buildYearGrid(today);
+  const grid = buildYearGrid(today, WEEKS);
   const byDate = new Map(days.map((d) => [d.date, d.value]));
   const max = days.reduce((m, d) => Math.max(m, d.value), 0);
 
