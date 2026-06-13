@@ -27,3 +27,6 @@ docs/
 # macOS scratch screenshots dropped in the repo (kept local, never published).
 # Curated images live in assets/ and app/src-tauri/icons/ and are NOT matched.
 Screenshot*.png
+
+# Local-only sub-project (kept local, not published)
+/token-pulse/
