@@ -2,12 +2,12 @@ mod cache_path;
 mod render;
 
 use clap::{Parser, ValueEnum};
-use tokenpulse_core::{
+use pulsegraph_core::{
     default_projects_dir, scan, streaks, summarize, totals, Filter, Metric, Pricing,
 };
 
 #[derive(Parser, Debug)]
-#[command(name = "tokenpulse", about = "Claude Code token-usage heatmap")]
+#[command(name = "pulsegraph", about = "Claude Code token-usage heatmap")]
 struct Args {
     /// Which metric drives the heatmap and stats.
     #[arg(long, value_enum, default_value_t = MetricArg::Cost)]
@@ -55,7 +55,7 @@ fn main() {
         return;
     }
 
-    let mut cache = match tokenpulse_core::cache::Cache::open(&cache_path::cache_db_path()) {
+    let mut cache = match pulsegraph_core::cache::Cache::open(&cache_path::cache_db_path()) {
         Ok(c) => c,
         Err(e) => {
             eprintln!("cache error: {e}");

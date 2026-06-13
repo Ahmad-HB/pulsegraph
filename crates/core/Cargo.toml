@@ -1,5 +1,5 @@
 [package]
-name = "tokenpulse-core"
+name = "pulsegraph-core"
 edition.workspace = true
 version.workspace = true
 

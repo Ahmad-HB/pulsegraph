@@ -1,14 +1,14 @@
 [package]
-name = "tokenpulse-cli"
+name = "pulsegraph-cli"
 edition.workspace = true
 version.workspace = true
 
 [[bin]]
-name = "tokenpulse"
+name = "pulsegraph"
 path = "src/main.rs"
 
 [dependencies]
-tokenpulse-core = { path = "../core" }
+pulsegraph-core = { path = "../core" }
 clap.workspace = true
 owo-colors.workspace = true
 directories = { workspace = true }

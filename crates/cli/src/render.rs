@@ -1,7 +1,7 @@
 use chrono::{Datelike, Duration, NaiveDate};
 use owo_colors::OwoColorize;
-use tokenpulse_core::stats::{Streaks, Totals};
-use tokenpulse_core::{Metric, Summary};
+use pulsegraph_core::stats::{Streaks, Totals};
+use pulsegraph_core::{Metric, Summary};
 
 /// Map a value to a 0..=4 intensity bucket given the period max.
 pub fn level(value: f64, max: f64) -> u8 {
@@ -58,7 +58,7 @@ pub fn print_heatmap(
     today: NaiveDate,
     unreadable: u64,
 ) {
-    println!("\nTokenPulse — {}\n", metric_label(metric));
+    println!("\nPulseGraph — {}\n", metric_label(metric));
 
     // Build the grid: 53 columns (weeks) x 7 rows (Mon..Sun), ending at `today`.
     let weeks = 53;
