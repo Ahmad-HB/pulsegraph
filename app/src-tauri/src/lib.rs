@@ -10,6 +10,7 @@ use tauri::Manager;
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init()) // keep whatever plugins the scaffold added
+        .plugin(tauri_plugin_store::Builder::new().build())
         .manage(AppState::new())
         .setup(|app| {
             // Menu-bar app: no dock icon, stays resident as a tray-only accessory.
@@ -21,6 +22,8 @@ pub fn run() {
             let state: tauri::State<AppState> = handle.state();
             let _ = commands::refresh(state);
             tray::setup_tray(app.handle())?;
+            // Show today's total on the tray label.
+            tray::update_tray_title(app.handle());
             Ok(())
         })
         .on_window_event(|window, event| {
@@ -36,7 +39,7 @@ pub fn run() {
                 }
             }
         })
-        .invoke_handler(tauri::generate_handler![commands::refresh, commands::get_snapshot])
+        .invoke_handler(tauri::generate_handler![commands::refresh, commands::get_snapshot, commands::quit])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

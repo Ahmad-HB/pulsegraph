@@ -6,6 +6,26 @@ use tauri::{
 
 use std::sync::atomic::{AtomicU64, Ordering};
 
+use crate::state::AppState;
+use crate::snapshot::build_snapshot;
+
+/// Update the menu-bar label to today's cost total.
+pub fn update_tray_title<R: Runtime>(app: &AppHandle<R>) {
+    let state = app.state::<AppState>();
+    let events = state.events.lock().unwrap();
+    let snap = build_snapshot(&events, &state.pricing, None, None, "cost", 0);
+    let today = chrono::Local::now().date_naive().to_string();
+    let today_total = snap
+        .days
+        .iter()
+        .find(|d| d.date == today)
+        .map(|d| d.value)
+        .unwrap_or(0.0);
+    if let Some(tray) = app.tray_by_id("main") {
+        let _ = tray.set_title(Some(format!("${today_total:.2}")));
+    }
+}
+
 /// Timestamps (ms since epoch) shared with the blur handler in lib.rs to tame
 /// macOS menu-bar focus flapping.
 pub static LAST_SHOW_MS: AtomicU64 = AtomicU64::new(0);
