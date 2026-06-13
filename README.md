@@ -1,33 +1,79 @@
-# pulsegraph
+<div align="center">
+  <img src="assets/logo.png" alt="PulseGraph" width="120" height="120" />
+  <h1>PulseGraph</h1>
+  <p><strong>Your AI token usage, at a glance.</strong></p>
+</div>
 
-**Your AI token usage, at a glance.** pulsegraph turns the transcripts that
-Claude Code already writes to your disk into a GitHub-style contribution
-heatmap — so you can see how much you're using AI, day by day.
+PulseGraph turns the transcripts that Claude Code already writes to your disk
+into a GitHub-style contribution heatmap — so you can see how much you're using
+AI, day by day.
 
 No accounts, no network, no scraping: it reads `~/.claude/projects/**/*.jsonl`
 locally and computes everything on your machine.
 
-> **Status:** the `core` engine and a terminal **CLI** are working today. A
-> cross-platform menu-bar / system-tray app (the primary experience) is the next
-> milestone and is built on the same `core`.
+> **Status:** the `core` engine, the terminal **CLI**, and a native **macOS
+> menu-bar app** (the primary experience) are all working. Windows/Linux tray
+> support is planned — the core and UI are cross-platform; only packaging
+> remains.
 
-## What it shows
+## The app
 
-- A full-year **heatmap** of your usage intensity.
-- Switchable metric: **cost ($)**, **billable tokens** (input + output +
-  cache-writes), **output tokens**, or **raw total** (everything incl. cache
-  reads).
-- Filter by **project** or **model**.
-- Stat cards: total, best day, average per active day, and **current / longest
-  streak**.
+A live cost readout sits in your macOS menu bar; clicking it opens a popover
+with:
 
-Cost is an estimate from a bundled per-model price table (cache writes and reads
-priced with the documented multipliers); unknown models show `—` rather than a
-fabricated number.
+- A **heatmap** of recent usage intensity.
+- Three side-by-side dropdowns: **metric**, **project**, and **model**.
+- **Stat cards** — total, best day, average per active day, and current /
+  longest **streak**.
+- A **per-project** breakdown for today.
+- Full **theming** — presets (GitHub green, blue, purple, amber), dark / light
+  mode, and a custom palette editor.
+- An optional **local profile image** (you pick a file; it never leaves your
+  machine).
 
-## Install / run (CLI)
+The app is built on the same `core` as the CLI.
 
-Requires a recent stable Rust toolchain.
+## Screenshots
+
+<div align="center">
+  <img src="assets/screenshots/popover.png" alt="PulseGraph popover (dark)" width="720" />
+  <br /><em>The popover — heatmap, metric/project/model dropdowns, stat cards, and per-project breakdown.</em>
+  <br /><br />
+  <img src="assets/screenshots/popover-light.png" alt="PulseGraph popover (light)" width="720" />
+  <br /><em>Light mode.</em>
+  <br /><br />
+  <img src="assets/screenshots/preferences.png" alt="PulseGraph preferences" width="720" />
+  <br /><em>Preferences — palette presets, dark / light mode, and a custom palette editor.</em>
+</div>
+
+## What it measures
+
+Switchable metric:
+
+- **cost ($)** — estimated from a bundled per-model price table (cache writes
+  and reads priced with the documented multipliers); unknown models show `—`
+  rather than a fabricated number.
+- **billable tokens** — input + output + cache-writes.
+- **output tokens**.
+- **raw total** — everything, including cache reads.
+
+## Install / run
+
+### macOS menu-bar app
+
+Requires a recent stable Rust toolchain and Node.js.
+
+```bash
+git clone https://github.com/Ahmad-HB/pulsegraph.git
+cd pulsegraph/app
+npm install
+npm run tauri build          # bundles PulseGraph.app
+# → app/src-tauri/target/release/bundle/macos/PulseGraph.app
+```
+
+For development: `npm run tauri dev`.
+
+### CLI
 
 ```bash
 git clone https://github.com/Ahmad-HB/pulsegraph.git
@@ -56,7 +102,7 @@ Flags: `--metric <cost|billable|output|raw>`, `--project <name>`,
    UsageEvent (source-agnostic)
         │  aggregate by local-day / project / model
         ▼
-   metrics + streaks + cost   ──►  CLI heatmap (and, soon, the tray app)
+   metrics + streaks + cost   ──►  CLI heatmap  +  macOS menu-bar app
 ```
 
 An incremental SQLite cache keyed by `(file, mtime)` means only changed
@@ -70,11 +116,12 @@ aggregation, metrics, or the UI.
 - `crates/core` — `pulsegraph-core`: discovery, parsing, aggregation, pricing,
   streaks, and the incremental cache. Fully unit-tested.
 - `crates/cli` — `pulsegraph-cli`: the `pulsegraph` terminal binary.
-- `docs/superpowers/` — design spec and implementation plan.
+- `app/` — the Tauri (Rust) + React menu-bar app.
+- `assets/` — logo and screenshots.
 
 ## License
 
-pulsegraph is **dual-licensed**:
+PulseGraph is **dual-licensed**:
 
 - Open source under **AGPL-3.0** — see [`LICENSE`](./LICENSE).
 - A **commercial license** is available for proprietary / closed-source use —

@@ -23,3 +23,7 @@ dist
 
 # Internal design docs (kept local, not published)
 docs/
+
+# macOS scratch screenshots dropped in the repo (kept local, never published).
+# Curated images live in assets/ and app/src-tauri/icons/ and are NOT matched.
+Screenshot*.png
