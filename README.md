@@ -11,10 +11,10 @@ AI, day by day.
 No accounts, no network, no scraping: it reads `~/.claude/projects/**/*.jsonl`
 locally and computes everything on your machine.
 
-> **Status:** the `core` engine, the terminal **CLI**, and a native **macOS
-> menu-bar app** (the primary experience) are all working. Windows/Linux tray
-> support is planned — the core and UI are cross-platform; only packaging
-> remains.
+> **Status:** the `core` engine, an interactive terminal **TUI**, and a native
+> **macOS menu-bar app** (the primary experience) are all working.
+> Windows/Linux tray support is planned — the core and UI are cross-platform;
+> only packaging remains.
 
 ## The app
 
@@ -44,6 +44,9 @@ The app is built on the same `core` as the CLI.
   <br /><br />
   <img src="assets/screenshots/preferences.png" alt="PulseGraph preferences" width="720" />
   <br /><em>Preferences — palette presets, dark / light mode, and a custom palette editor.</em>
+  <br /><br />
+  <img src="assets/screenshots/cli-tui.png" alt="PulseGraph terminal UI" width="720" />
+  <br /><em>The terminal UI — an interactive heatmap with a day-detail breakdown and live stats, driven from the keyboard.</em>
 </div>
 
 ## What it measures
@@ -79,19 +82,47 @@ For development: `npm run tauri dev`.
 git clone https://github.com/Ahmad-HB/pulsegraph.git
 cd pulsegraph
 
-# Render the heatmap (defaults to the cost metric)
-cargo run -p pulsegraph-cli -- --metric cost
+cargo run -p pulsegraph-cli          # launches the interactive terminal UI
+```
 
-# Other metrics and filters
+Run in a real terminal and PulseGraph opens an **interactive heatmap** you drive
+from the keyboard:
+
+| Key | Action |
+|-----|--------|
+| `← ↑ ↓ →` | move the day cursor (the detail panel follows) |
+| `t` | jump to today |
+| `m` | cycle metric — cost → billable → output → raw |
+| `r` | cycle range — 12 weeks → 30 days → full year |
+| `p` | filter by project |
+| `M` | filter by model |
+| `q` / `Esc` | quit |
+
+You can preset the starting metric and filters with flags:
+
+```bash
 cargo run -p pulsegraph-cli -- --metric billable --project my-repo
-cargo run -p pulsegraph-cli -- --metric output --model claude-opus-4-8
+cargo run -p pulsegraph-cli -- --model claude-opus-4-8
+```
 
-# Machine-readable output
-cargo run -p pulsegraph-cli -- --metric cost --json
+For scripting, output stays non-interactive automatically — piping or
+redirecting prints a static heatmap, and `--json` emits machine-readable data:
+
+```bash
+cargo run -p pulsegraph-cli -- --json        # JSON for scripts
+cargo run -p pulsegraph-cli | less -R        # static heatmap (piped)
 ```
 
 Flags: `--metric <cost|billable|output|raw>`, `--project <name>`,
 `--model <id>`, `--json`.
+
+Colors degrade automatically: 24-bit where the terminal supports it, xterm-256
+otherwise (so Apple Terminal renders correctly), and a glyph ramp under
+`NO_COLOR`.
+
+> **Add a screenshot:** drop a capture of the TUI at
+> `assets/screenshots/cli-tui.png` and it will appear in the
+> [Screenshots](#screenshots) section above (that path is already referenced).
 
 ## How it works
 
