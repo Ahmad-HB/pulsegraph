@@ -1,5 +1,6 @@
 mod cache_path;
 mod render;
+mod tui;
 
 use clap::{Parser, ValueEnum};
 use pulsegraph_core::{
