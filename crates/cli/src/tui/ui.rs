@@ -196,7 +196,7 @@ fn draw_detail(f: &mut Frame, app: &App, area: Rect) {
             .get(i)
             .map(|b| format!("{:<16}{:>10}", trunc(&b.label, 15), fmt_value(app.metric, b.value)))
             .unwrap_or_default();
-        lines.push(Line::from(format!("{:<28}{}", p, m)));
+        lines.push(Line::from(format!("{p:<28}{m}")));
     }
 
     f.render_widget(Paragraph::new(lines), inner);
@@ -254,7 +254,7 @@ fn draw_picker(f: &mut Frame, p: &Picker, area: Rect) {
         } else {
             Style::default()
         };
-        lines.push(Line::from(Span::styled(format!(" {}", item), style)));
+        lines.push(Line::from(Span::styled(format!(" {item}"), style)));
     }
     f.render_widget(Paragraph::new(lines), inner);
 }
