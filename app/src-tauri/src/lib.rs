@@ -24,9 +24,15 @@ pub fn run() {
             Ok(())
         })
         .on_window_event(|window, event| {
+            use std::sync::atomic::Ordering;
             if let tauri::WindowEvent::Focused(false) = event {
                 if window.label() == "popover" {
-                    let _ = window.hide();
+                    let since_show =
+                        tray::now_ms().saturating_sub(tray::LAST_SHOW_MS.load(Ordering::Relaxed));
+                    if since_show > 300 {
+                        let _ = window.hide();
+                        tray::LAST_BLUR_HIDE_MS.store(tray::now_ms(), Ordering::Relaxed);
+                    }
                 }
             }
         })
