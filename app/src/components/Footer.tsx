@@ -14,7 +14,7 @@ export function Footer({ generatedAt, onSettings }: { generatedAt: number; onSet
       <span>Updated {ago(generatedAt)}</span>
       <span className="menu">
         <button onClick={onSettings}>⚙︎ Settings</button>
-        <button onClick={() => quit()}>Quit</button>
+        <button className="quit" onClick={() => quit()}>Quit</button>
       </span>
     </div>
   );

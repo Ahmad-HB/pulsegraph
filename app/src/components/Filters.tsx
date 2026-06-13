@@ -1,3 +1,5 @@
+import { Dropdown } from "./Dropdown";
+
 export function Filters({
   projects, models, project, model, setProject, setModel,
 }: {
@@ -7,14 +9,8 @@ export function Filters({
 }) {
   return (
     <div className="filters">
-      <select value={project ?? ""} onChange={(e) => setProject(e.target.value || null)}>
-        <option value="">All projects</option>
-        {projects.map((p) => <option key={p} value={p}>{p}</option>)}
-      </select>
-      <select value={model ?? ""} onChange={(e) => setModel(e.target.value || null)}>
-        <option value="">All models</option>
-        {models.map((m) => <option key={m} value={m}>{m}</option>)}
-      </select>
+      <Dropdown value={project} placeholder="All projects" options={projects} onChange={setProject} />
+      <Dropdown value={model} placeholder="All models" options={models} onChange={setModel} />
     </div>
   );
 }

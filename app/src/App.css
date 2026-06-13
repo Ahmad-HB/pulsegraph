@@ -3,7 +3,7 @@
   --hm-0:#161b22; --hm-1:#0e4429; --hm-2:#006d32; --hm-3:#26a641; --hm-4:#39d353; }
 * { box-sizing: border-box; }
 body { margin: 0; background: transparent; }
-.pop, .prefs { background: transparent; color: var(--fg);
+.pop, .prefs { background: rgba(13, 17, 23, 0.72); color: var(--fg);
   font-family: -apple-system, system-ui, sans-serif; min-height: 100vh;
   border-radius: 16px; overflow: hidden; }
 .pop { box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.08); }
@@ -13,11 +13,24 @@ body { margin: 0; background: transparent; }
 .big { font-size: 20px; font-weight: 700; }
 .chips { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
 .chip { font-size:11px; padding:3px 9px; border-radius:999px; background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.12); color:var(--muted); cursor:pointer; }
+  border:1px solid rgba(255,255,255,0.12); color:#c9d1d9; cursor:pointer; }
 .chip.on { border-color:#2f81f7; color:#cae3ff; background:#1f6feb22; }
-.filters { display:flex; gap:6px; padding:8px 14px; }
-.filters select { flex:1; font-size:11px; background:rgba(255,255,255,0.06); color:var(--fg);
-  border:1px solid rgba(255,255,255,0.12); border-radius:6px; padding:3px 6px; }
+.filters { display:flex; gap:8px; padding:8px 14px; }
+.dd { position:relative; flex:1; }
+.dd-btn { width:100%; display:flex; align-items:center; justify-content:space-between; gap:6px;
+  font-size:11px; padding:5px 9px; border-radius:8px; cursor:pointer; color:var(--fg);
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); }
+.dd-btn:hover { background:rgba(255,255,255,0.10); }
+.dd-label { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dd-caret { opacity:.6; font-size:9px; }
+.dd-menu { position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:20;
+  background:rgba(22,27,34,0.98); border:1px solid rgba(255,255,255,0.14); border-radius:8px;
+  box-shadow:0 8px 24px rgba(0,0,0,.5); max-height:220px; overflow-y:auto; padding:4px; }
+.dd-item { display:block; width:100%; text-align:left; font-size:11px; padding:5px 8px; border:none;
+  background:none; color:var(--fg); cursor:pointer; border-radius:6px; white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis; }
+.dd-item:hover { background:rgba(255,255,255,0.10); }
+.dd-item.on { color:#cae3ff; background:rgba(31,111,235,0.18); }
 .pbody { padding: 10px 14px 12px; }
 .hm-wrap { font-size:9px; color:var(--muted); }
 .hm-months { display:flex; margin-left:26px; }
@@ -51,8 +64,12 @@ body { margin: 0; background: transparent; }
 .pb .v { width:54px; text-align:right; color:var(--muted); }
 .footer { display:flex; justify-content:space-between; align-items:center; padding:8px 14px;
   border-top:1px solid rgba(255,255,255,0.10); font-size:11px; color:var(--muted); }
-.footer .menu button { background:none; border:none; color:var(--muted); cursor:pointer; font-size:11px; margin-left:12px; }
-.footer .menu button:hover { color:var(--fg); }
+.footer .menu { display:flex; gap:8px; }
+.footer .menu button { font-size:11px; font-weight:500; padding:4px 10px; border-radius:7px; cursor:pointer;
+  color:var(--fg); background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.16); }
+.footer .menu button:hover { background:rgba(255,255,255,0.14); }
+.footer .menu button.quit { color:#ff7b72; border-color:rgba(255,123,114,0.45); background:rgba(255,123,114,0.10); }
+.footer .menu button.quit:hover { background:rgba(255,123,114,0.20); }
 .empty { color:var(--muted); font-size:13px; text-align:center; padding:24px 0; }
 /* Preferences */
 .prefs { padding:14px; }
