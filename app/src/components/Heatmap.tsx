@@ -1,8 +1,6 @@
 import { buildYearGrid, level, localKey } from "../lib/heatmap";
 import type { DayValue } from "../types";
 
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
 // Recent window — the full year overflows a menu-bar popover, and a ~8-month
 // window comfortably covers actual usage while fitting the width.
 const WEEKS = 34;
@@ -13,18 +11,8 @@ export function Heatmap({ days }: { days: DayValue[] }) {
   const byDate = new Map(days.map((d) => [d.date, d.value]));
   const max = days.reduce((m, d) => Math.max(m, d.value), 0);
 
-  // Month labels: show a month name at the first column whose first row is in a new month.
-  const monthLabels = grid.map((week, i) => {
-    const first = week[0];
-    const prev = i > 0 ? grid[i - 1][0] : null;
-    return !prev || prev.getMonth() !== first.getMonth() ? MONTHS[first.getMonth()] : "";
-  });
-
   return (
     <div className="hm-wrap">
-      <div className="hm-months">
-        {monthLabels.map((m, i) => <span key={i} className="hm-month">{m}</span>)}
-      </div>
       <div className="hm-body">
         <div className="hm-days">
           <span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span>
