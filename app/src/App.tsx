@@ -1,51 +1,77 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
+import { useEffect, useState, useCallback } from "react";
+import { getSnapshot, refresh } from "./api";
+import type { Snapshot, Metric } from "./types";
+import { Heatmap } from "./components/Heatmap";
 import "./App.css";
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+const METRICS: Metric[] = ["cost", "billable", "output", "raw"];
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
+function fmt(metric: Metric, v: number): string {
+  return metric === "cost" ? `$${v.toFixed(2)}` : Math.round(v).toLocaleString();
+}
+
+export default function App() {
+  const [metric, setMetric] = useState<Metric>("cost");
+  const [snap, setSnap] = useState<Snapshot | null>(null);
+
+  const load = useCallback(async (m: Metric) => {
+    setSnap(await getSnapshot(m, null, null));
+  }, []);
+
+  // Initial + 60s refresh-from-disk, then reload snapshot.
+  useEffect(() => {
+    let alive = true;
+    const tick = async () => {
+      await refresh();
+      if (alive) await load(metric);
+    };
+    tick();
+    const id = setInterval(tick, 60_000);
+    return () => { alive = false; clearInterval(id); };
+  }, [load, metric]);
+
+  // Metric toggle: re-aggregate in memory (no disk).
+  useEffect(() => { load(metric); }, [metric, load]);
+
+  const today = snap?.days.find((d) => d.date === todayKey())?.value ?? 0;
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="pop">
+      <div className="ph">
+        <div className="t">PulseGraph</div>
+        <div className="big">{snap ? fmt(metric, today) : "…"}</div>
       </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+      <div className="toggles">
+        {METRICS.map((m) => (
+          <button
+            key={m}
+            className={`chip ${m === metric ? "on" : ""}`}
+            onClick={() => setMetric(m)}
+          >
+            {m}
+          </button>
+        ))}
+      </div>
+      <div className="pbody">
+        {snap && snap.days.length > 0 ? (
+          <Heatmap days={snap.days} />
+        ) : (
+          <p className="empty">No Claude Code usage found yet.</p>
+        )}
+        {snap && (
+          <div className="stats">
+            Total {fmt(metric, snap.total)} · streak {snap.current_streak}d ·
+            active {snap.active_days}d
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
-export default App;
+function todayKey(): string {
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
